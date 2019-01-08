@@ -17,13 +17,13 @@ def class_name(node):
 
 def dependencyA(node):
     if node.has_dependency():
-        return Node(node.layer + 1, 2 * node.index, node.depth)
+        return Node(node.layer + 1, node.index, node.depth)
     else:
         return None
 
 def dependencyB(node):
     if node.has_dependency():
-        return Node(node.layer + 1, 2 * node.index + 1, node.depth)
+        return Node(node.layer + 1, node.index + 1, node.depth)
     else:
         return None
 
@@ -52,8 +52,7 @@ private:
 }};""".format(class_name=class_name(node))
 
 def layer_size(layer, depth):
-    inverse_layer = depth - layer - 1
-    return 1 << inverse_layer
+    return depth - layer;
 
 def iterate_node(depth, func):
     for layer in range(0, depth):
