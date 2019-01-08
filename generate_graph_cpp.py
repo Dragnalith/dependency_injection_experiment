@@ -17,13 +17,13 @@ def class_name(node):
 
 def dependencyA(node):
     if node.has_dependency():
-        return Node(node.layer + 1, int(node.index / 2), node.depth)
+        return Node(node.layer + 1, 2 * node.index, node.depth)
     else:
         return None
 
 def dependencyB(node):
     if node.has_dependency():
-        return Node(node.layer + 1, int(node.index / 2) + 1, node.depth)
+        return Node(node.layer + 1, 2 * node.index + 1, node.depth)
     else:
         return None
 
