@@ -63,6 +63,7 @@ def main():
     depth = int(sys.argv[1])
     output_path = sys.argv[2] + "/gen_test.h"
     output_path_kangaru = sys.argv[2] + "/gen_test.kangaru.h"
+    output_path_kangaru2 = sys.argv[2] + "/gen_test.kangaru.2.h"
     output_path_manual = sys.argv[2] + "/gen_test.manual.h"
 
     with open(output_path, 'w+') as output_file:
@@ -108,6 +109,20 @@ def main():
             output_file.write("struct {class_name}Service : kgr::single_service<{class_name}, kgr::autowire> {{}};\n".format(class_name=class_name(node)))
             output_file.write("auto service_map({class_name} const&) -> {class_name}Service;\n".format(class_name=class_name(node)))
         iterate_node(depth, write_kangaru_service)
+
+    with open(output_path_kangaru2, 'w+') as output_file:
+        output_file.write("#pragma once\n")
+
+        output_file.write("#include \"gen_test.h\"\n")
+        output_file.write("#include <kangaru/kangaru.hpp>\n")
+
+        def write_kangaru_service2(node):
+            if node.has_dependency():
+                output_file.write("struct {class_name}Service : kgr::single_service<{class_name}, kgr::dependency<{depA}Service,{depB}Service>> {{}};\n".format(class_name=class_name(node),depA=class_name(dependencyA(node)),depB=class_name(dependencyB(node)) ))
+            else:
+                output_file.write("struct {class_name}Service : kgr::single_service<{class_name}> {{}};\n".format(class_name=class_name(node)))
+            output_file.write("auto service_map({class_name} const&) -> {class_name}Service;\n".format(class_name=class_name(node)))
+        iterate_node(depth, write_kangaru_service2)
 
 if __name__ == "__main__":
     main()
