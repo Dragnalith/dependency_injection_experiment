@@ -2,15 +2,36 @@
 #include "gen_test.h"
 
 MyClass_0_0* create_manually() {
-    MyClass_8_0* instance_8_0 = new MyClass_8_0();
-    MyClass_8_1* instance_8_1 = new MyClass_8_1();
-    MyClass_8_2* instance_8_2 = new MyClass_8_2();
-    MyClass_8_3* instance_8_3 = new MyClass_8_3();
-    MyClass_8_4* instance_8_4 = new MyClass_8_4();
-    MyClass_8_5* instance_8_5 = new MyClass_8_5();
-    MyClass_8_6* instance_8_6 = new MyClass_8_6();
-    MyClass_8_7* instance_8_7 = new MyClass_8_7();
-    MyClass_8_8* instance_8_8 = new MyClass_8_8();
+    MyClass_10_0* instance_10_0 = new MyClass_10_0();
+    MyClass_10_1* instance_10_1 = new MyClass_10_1();
+    MyClass_10_2* instance_10_2 = new MyClass_10_2();
+    MyClass_10_3* instance_10_3 = new MyClass_10_3();
+    MyClass_10_4* instance_10_4 = new MyClass_10_4();
+    MyClass_10_5* instance_10_5 = new MyClass_10_5();
+    MyClass_10_6* instance_10_6 = new MyClass_10_6();
+    MyClass_10_7* instance_10_7 = new MyClass_10_7();
+    MyClass_10_8* instance_10_8 = new MyClass_10_8();
+    MyClass_10_9* instance_10_9 = new MyClass_10_9();
+    MyClass_10_10* instance_10_10 = new MyClass_10_10();
+    MyClass_9_0* instance_9_0 = new MyClass_9_0(*instance_10_0, *instance_10_1);
+    MyClass_9_1* instance_9_1 = new MyClass_9_1(*instance_10_1, *instance_10_2);
+    MyClass_9_2* instance_9_2 = new MyClass_9_2(*instance_10_2, *instance_10_3);
+    MyClass_9_3* instance_9_3 = new MyClass_9_3(*instance_10_3, *instance_10_4);
+    MyClass_9_4* instance_9_4 = new MyClass_9_4(*instance_10_4, *instance_10_5);
+    MyClass_9_5* instance_9_5 = new MyClass_9_5(*instance_10_5, *instance_10_6);
+    MyClass_9_6* instance_9_6 = new MyClass_9_6(*instance_10_6, *instance_10_7);
+    MyClass_9_7* instance_9_7 = new MyClass_9_7(*instance_10_7, *instance_10_8);
+    MyClass_9_8* instance_9_8 = new MyClass_9_8(*instance_10_8, *instance_10_9);
+    MyClass_9_9* instance_9_9 = new MyClass_9_9(*instance_10_9, *instance_10_10);
+    MyClass_8_0* instance_8_0 = new MyClass_8_0(*instance_9_0, *instance_9_1);
+    MyClass_8_1* instance_8_1 = new MyClass_8_1(*instance_9_1, *instance_9_2);
+    MyClass_8_2* instance_8_2 = new MyClass_8_2(*instance_9_2, *instance_9_3);
+    MyClass_8_3* instance_8_3 = new MyClass_8_3(*instance_9_3, *instance_9_4);
+    MyClass_8_4* instance_8_4 = new MyClass_8_4(*instance_9_4, *instance_9_5);
+    MyClass_8_5* instance_8_5 = new MyClass_8_5(*instance_9_5, *instance_9_6);
+    MyClass_8_6* instance_8_6 = new MyClass_8_6(*instance_9_6, *instance_9_7);
+    MyClass_8_7* instance_8_7 = new MyClass_8_7(*instance_9_7, *instance_9_8);
+    MyClass_8_8* instance_8_8 = new MyClass_8_8(*instance_9_8, *instance_9_9);
     MyClass_7_0* instance_7_0 = new MyClass_7_0(*instance_8_0, *instance_8_1);
     MyClass_7_1* instance_7_1 = new MyClass_7_1(*instance_8_1, *instance_8_2);
     MyClass_7_2* instance_7_2 = new MyClass_7_2(*instance_8_2, *instance_8_3);

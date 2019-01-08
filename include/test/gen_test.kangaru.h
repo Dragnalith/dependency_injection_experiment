@@ -1,6 +1,48 @@
 #pragma once
 #include "gen_test.h"
 #include <kangaru/kangaru.hpp>
+struct MyClass_10_0Service : kgr::single_service<MyClass_10_0, kgr::autowire> {};
+auto service_map(MyClass_10_0 const&) -> MyClass_10_0Service;
+struct MyClass_10_1Service : kgr::single_service<MyClass_10_1, kgr::autowire> {};
+auto service_map(MyClass_10_1 const&) -> MyClass_10_1Service;
+struct MyClass_10_2Service : kgr::single_service<MyClass_10_2, kgr::autowire> {};
+auto service_map(MyClass_10_2 const&) -> MyClass_10_2Service;
+struct MyClass_10_3Service : kgr::single_service<MyClass_10_3, kgr::autowire> {};
+auto service_map(MyClass_10_3 const&) -> MyClass_10_3Service;
+struct MyClass_10_4Service : kgr::single_service<MyClass_10_4, kgr::autowire> {};
+auto service_map(MyClass_10_4 const&) -> MyClass_10_4Service;
+struct MyClass_10_5Service : kgr::single_service<MyClass_10_5, kgr::autowire> {};
+auto service_map(MyClass_10_5 const&) -> MyClass_10_5Service;
+struct MyClass_10_6Service : kgr::single_service<MyClass_10_6, kgr::autowire> {};
+auto service_map(MyClass_10_6 const&) -> MyClass_10_6Service;
+struct MyClass_10_7Service : kgr::single_service<MyClass_10_7, kgr::autowire> {};
+auto service_map(MyClass_10_7 const&) -> MyClass_10_7Service;
+struct MyClass_10_8Service : kgr::single_service<MyClass_10_8, kgr::autowire> {};
+auto service_map(MyClass_10_8 const&) -> MyClass_10_8Service;
+struct MyClass_10_9Service : kgr::single_service<MyClass_10_9, kgr::autowire> {};
+auto service_map(MyClass_10_9 const&) -> MyClass_10_9Service;
+struct MyClass_10_10Service : kgr::single_service<MyClass_10_10, kgr::autowire> {};
+auto service_map(MyClass_10_10 const&) -> MyClass_10_10Service;
+struct MyClass_9_0Service : kgr::single_service<MyClass_9_0, kgr::autowire> {};
+auto service_map(MyClass_9_0 const&) -> MyClass_9_0Service;
+struct MyClass_9_1Service : kgr::single_service<MyClass_9_1, kgr::autowire> {};
+auto service_map(MyClass_9_1 const&) -> MyClass_9_1Service;
+struct MyClass_9_2Service : kgr::single_service<MyClass_9_2, kgr::autowire> {};
+auto service_map(MyClass_9_2 const&) -> MyClass_9_2Service;
+struct MyClass_9_3Service : kgr::single_service<MyClass_9_3, kgr::autowire> {};
+auto service_map(MyClass_9_3 const&) -> MyClass_9_3Service;
+struct MyClass_9_4Service : kgr::single_service<MyClass_9_4, kgr::autowire> {};
+auto service_map(MyClass_9_4 const&) -> MyClass_9_4Service;
+struct MyClass_9_5Service : kgr::single_service<MyClass_9_5, kgr::autowire> {};
+auto service_map(MyClass_9_5 const&) -> MyClass_9_5Service;
+struct MyClass_9_6Service : kgr::single_service<MyClass_9_6, kgr::autowire> {};
+auto service_map(MyClass_9_6 const&) -> MyClass_9_6Service;
+struct MyClass_9_7Service : kgr::single_service<MyClass_9_7, kgr::autowire> {};
+auto service_map(MyClass_9_7 const&) -> MyClass_9_7Service;
+struct MyClass_9_8Service : kgr::single_service<MyClass_9_8, kgr::autowire> {};
+auto service_map(MyClass_9_8 const&) -> MyClass_9_8Service;
+struct MyClass_9_9Service : kgr::single_service<MyClass_9_9, kgr::autowire> {};
+auto service_map(MyClass_9_9 const&) -> MyClass_9_9Service;
 struct MyClass_8_0Service : kgr::single_service<MyClass_8_0, kgr::autowire> {};
 auto service_map(MyClass_8_0 const&) -> MyClass_8_0Service;
 struct MyClass_8_1Service : kgr::single_service<MyClass_8_1, kgr::autowire> {};
