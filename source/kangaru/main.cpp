@@ -1,4 +1,4 @@
-#include <test/gen_test.kangaru.2.h>
+#include <test/gen_test.kangaru.h>
 
 #include <assert.h>
 
