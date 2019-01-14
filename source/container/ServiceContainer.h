@@ -2,6 +2,7 @@
 
 #include "Result.h"
 #include "TypeId.h"
+#include "TypeTraits.h"
 
 #include <assert.h>
 #include <functional>
@@ -10,6 +11,20 @@
 
 namespace drgn
 {
+
+class ServiceContainer;
+
+template<class, class, class>
+struct Factory;
+
+template<class T, class Func, class... Args>
+struct Factory<T, Func, drgn::type_list<Args...>>
+{
+    static T* Create(Func f, ServiceContainer& container)
+    {
+        return f(container.Get<base_type<Args>>()...);
+    }
+};
 
 class ServiceContainer
 {
@@ -88,6 +103,19 @@ public:
     void Register(typename Service<T>::InitializerFunc initializer, typename Service<T>::FinalizerFunc finalizer)
     {
         auto id = TypeId::Get<T>();
+        m_services.emplace(id, std::make_shared<Service<T>>(id, std::move(initializer), std::move(finalizer)));
+        m_serviceOrder.push_back(m_services[id]);
+    }
+
+    template<class T, class InitFunc>
+    void Register(InitFunc creater, typename Service<T>::FinalizerFunc finalizer)
+    {
+        static_assert(std::is_same_v<T*, drgn::function_traits<InitFunc>::result_type>, "Type registered and type returned by the creater are different");
+
+        auto id = TypeId::Get<T>();
+        auto initializer = [this, creater](ServiceContainer& container) -> T* {
+            return drgn::Factory<T, InitFunc, typename drgn::function_traits<InitFunc>::args>::Create(creater, *this);
+        };
         m_services.emplace(id, std::make_shared<Service<T>>(id, std::move(initializer), std::move(finalizer)));
         m_serviceOrder.push_back(m_services[id]);
     }

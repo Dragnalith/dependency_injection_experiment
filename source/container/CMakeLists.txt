@@ -4,4 +4,5 @@ add_executable(container
     ModuleA.h
     ModuleB.h
     TypeId.h
+    TypeTraits.h
 )

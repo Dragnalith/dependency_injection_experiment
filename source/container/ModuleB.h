@@ -9,6 +9,5 @@ public:
         : m_moduleA(moduleA)
     {}
 
-private:
     ModuleA& m_moduleA;
 };

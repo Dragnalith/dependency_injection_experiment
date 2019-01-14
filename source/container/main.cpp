@@ -3,19 +3,11 @@
 #include "ModuleA.h"
 #include "ModuleB.h"
 
-ModuleA* InitModuleA(drgn::ServiceContainer& container)
-{
-    return new ModuleA();
-}
+#include <assert.h>
 
 void FinalizeModuleA(ModuleA* ptr)
 {
     delete ptr;
-}
-
-ModuleB* InitModuleB(drgn::ServiceContainer& container)
-{
-    return new ModuleB(container.Get<ModuleA>());
 }
 
 void FinalizeModuleB(ModuleB* ptr)
@@ -23,11 +15,21 @@ void FinalizeModuleB(ModuleB* ptr)
     delete ptr;
 }
 
+ModuleA* CreateModuleA()
+{
+    return new ModuleA();
+}
+
+ModuleB* CreateModuleB(ModuleA& moduleA)
+{
+    return new ModuleB(moduleA);
+}
+
 int main()
 {
     drgn::ServiceContainer container;
-    container.Register<ModuleA>(InitModuleA, FinalizeModuleA);
-    container.Register<ModuleB>(InitModuleB, FinalizeModuleB);
+    container.Register<ModuleA>(CreateModuleA, FinalizeModuleA);
+    container.Register<ModuleB>(CreateModuleB, FinalizeModuleB);
 
     container.Initialize();
 
@@ -36,6 +38,9 @@ int main()
     ModuleA& a1 = container.Get<ModuleA>();
     ModuleB& b1 = container.Get<ModuleB>();
 
+    assert(&a0 == &a1);
+    assert(&b0 == &b1);
+    assert(&a0 == &b0.m_moduleA);
 
     return 0;
 }
