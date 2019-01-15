@@ -40,4 +40,9 @@ struct function_traits<R (T::*)(TArgs...) const> {
   using args = type_list<TArgs...>;
 };
 
+template <class T>
+void print_type() {
+    T::this_method_Sh0uldNotExist_();
+}
+
 }

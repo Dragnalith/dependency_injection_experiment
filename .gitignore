@@ -18,3 +18,4 @@ bench_results
 /*.vcxproj.user
 /_build
 /_build2
+/.vscode

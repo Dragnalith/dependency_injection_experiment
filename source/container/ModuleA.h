@@ -2,6 +2,6 @@
 
 class ModuleA
 {
-private:
+public:
     int m_value = 42;
 };

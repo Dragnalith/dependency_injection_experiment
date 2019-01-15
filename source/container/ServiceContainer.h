@@ -1,4 +1,4 @@
-#pragma
+#pragma once
 
 #include "Result.h"
 #include "TypeId.h"
@@ -6,34 +6,45 @@
 
 #include <assert.h>
 #include <functional>
-#include <unordered_map>
 #include <memory>
+#include <unordered_map>
+#include <vector>
 
-namespace drgn
-{
+namespace drgn {
 
 class ServiceContainer;
 
-template<class, class, class>
+template <class, class, class>
 struct Factory;
 
-template<class T, class Func, class... Args>
-struct Factory<T, Func, drgn::type_list<Args...>>
-{
+template <class T, class Func, class... Args>
+struct Factory<T, Func, drgn::type_list<Args...>> {
     static T* Create(Func f, ServiceContainer& container)
     {
         return f(container.Get<base_type<Args>>()...);
     }
 };
 
-class ServiceContainer
-{
-private:
-    class ServiceBase
+template <class T, class>
+struct DefaultConstructor;
+
+template <class T, class... Args>
+struct DefaultConstructor<T, drgn::type_list<Args...>> {
+    static T* Create(ServiceContainer& container)
     {
+        return new T(Args{ container }...);
+    }
+    static void Destroy(T* instance)
+    {
+        delete instance;
+    }
+};
+
+class ServiceContainer {
+private:
+    class ServiceBase {
     public:
-        enum class Status
-        {
+        enum class Status {
             NotInitialized,
             StartInitializing,
             IsInitialized
@@ -44,7 +55,8 @@ private:
         ServiceBase(TypeId id)
             : m_id(id)
             , m_status(Status::NotInitialized)
-        {}
+        {
+        }
 
         bool IsInitialized()
         {
@@ -61,9 +73,8 @@ private:
         Status m_status;
     };
 
-    template<class T>
-    class Service : public ServiceBase
-    {
+    template <class T>
+    class Service : public ServiceBase {
     public:
         using InitializerFunc = std::function<T*(ServiceContainer&)>;
         using FinalizerFunc = std::function<void(T*)>;
@@ -72,8 +83,9 @@ private:
             : ServiceBase(id)
             , m_initializer(std::move(initializer))
             , m_finalizer(std::move(finalizer))
-        {}
-        
+        {
+        }
+
         void Initialize(ServiceContainer& container) override
         {
             m_instance = m_initializer(container);
@@ -98,38 +110,43 @@ private:
         FinalizerFunc m_finalizer;
     };
 
-public:
-    template<class T>
-    void Register(typename Service<T>::InitializerFunc initializer, typename Service<T>::FinalizerFunc finalizer)
+protected:
+    template <class T>
+    void RegisterImpl(typename Service<T>::InitializerFunc initializer, typename Service<T>::FinalizerFunc finalizer)
     {
         auto id = TypeId::Get<T>();
         m_services.emplace(id, std::make_shared<Service<T>>(id, std::move(initializer), std::move(finalizer)));
         m_serviceOrder.push_back(m_services[id]);
     }
 
-    template<class T, class InitFunc>
+public:
+    template <class T, class InitFunc>
     void Register(InitFunc creater, typename Service<T>::FinalizerFunc finalizer)
     {
         static_assert(std::is_same_v<T*, drgn::function_traits<InitFunc>::result_type>, "Type registered and type returned by the creater are different");
 
-        auto id = TypeId::Get<T>();
         auto initializer = [this, creater](ServiceContainer& container) -> T* {
             return drgn::Factory<T, InitFunc, typename drgn::function_traits<InitFunc>::args>::Create(creater, *this);
         };
-        m_services.emplace(id, std::make_shared<Service<T>>(id, std::move(initializer), std::move(finalizer)));
-        m_serviceOrder.push_back(m_services[id]);
+        RegisterImpl<T>(initializer, finalizer);
+    }
+
+    template <class T>
+    void Register()
+    {
+        using Factory = drgn::DefaultConstructor<ModuleB, drgn::ctor_args<ModuleB>>;
+        RegisterImpl<T>(Factory::Create, Factory::Destroy);
     }
 
     void Initialize()
     {
-        for (auto s : m_serviceOrder)
-        {
+        for (auto s : m_serviceOrder) {
             auto service = s.lock();
             service->Initialize(*this);
         }
     }
 
-    template<class T>
+    template <class T>
     T& Get()
     {
         TypeId id = TypeId::Get<T>();
@@ -145,5 +162,4 @@ private:
     std::unordered_map<TypeId, std::shared_ptr<ServiceBase>> m_services;
     std::vector<std::weak_ptr<ServiceBase>> m_serviceOrder;
 };
-
 }

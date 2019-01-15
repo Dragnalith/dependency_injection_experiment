@@ -1,4 +1,5 @@
 #include "ServiceContainer.h"
+#include "ConstructorTraits.h"
 
 #include "ModuleA.h"
 #include "ModuleB.h"
@@ -22,14 +23,14 @@ ModuleA* CreateModuleA()
 
 ModuleB* CreateModuleB(ModuleA& moduleA)
 {
-    return new ModuleB(moduleA);
+    return new ModuleB(moduleA, &moduleA);
 }
 
 int main()
 {
     drgn::ServiceContainer container;
     container.Register<ModuleA>(CreateModuleA, FinalizeModuleA);
-    container.Register<ModuleB>(CreateModuleB, FinalizeModuleB);
+    container.Register<ModuleB>();
 
     container.Initialize();
 

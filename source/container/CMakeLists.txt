@@ -1,5 +1,6 @@
 add_executable(container 
     main.cpp
+    ConstructorTraits.h
     ServiceContainer.h
     ModuleA.h
     ModuleB.h
