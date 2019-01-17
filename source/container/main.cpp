@@ -45,13 +45,13 @@ ModuleB* CreateModuleB(ModuleA& moduleA)
 void simple_test()
 {
     drgn::ServiceContainer container;
-    container.Register<ModuleA>();
     container.Register<ModuleB>();
+    container.Register<ModuleA>();
 
     container.Initialize();
 
-    ModuleA& a0 = container.Get<ModuleA>();
     ModuleB& b0 = container.Get<ModuleB>();
+    ModuleA& a0 = container.Get<ModuleA>();
     ModuleA& a1 = container.Get<ModuleA>();
     ModuleB& b1 = container.Get<ModuleB>();
 

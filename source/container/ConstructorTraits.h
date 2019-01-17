@@ -11,15 +11,13 @@ namespace drgn
 
 class ServiceContainer;
 
-namespace detail {
-
 template<class TParent>
 struct any_type {
     template <class T,
         class = std::enable_if_t<!std::is_same_v<const TParent, T> && !std::is_same_v<TParent, T>>>
     operator T&() const
     {
-        return container.Get<T>();
+        return container.GetOrCreate<T>();
     }
 
     template <class T,
@@ -31,6 +29,8 @@ struct any_type {
 
     ServiceContainer& container;
 };
+
+namespace detail {
 
 template <class T, int>
 using get = T;

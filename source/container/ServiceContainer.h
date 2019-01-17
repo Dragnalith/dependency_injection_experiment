@@ -3,6 +3,7 @@
 #include "Result.h"
 #include "TypeId.h"
 #include "TypeTraits.h"
+#include "ConstructorTraits.h"
 
 #include <assert.h>
 #include <functional>
@@ -26,10 +27,10 @@ struct Factory<T, Func, drgn::type_list<Args...>> {
 };
 
 template <class T, class>
-struct DefaultConstructor;
+struct DefaultFactory;
 
 template <class T, class... Args>
-struct DefaultConstructor<T, drgn::type_list<Args...>> {
+struct DefaultFactory<T, drgn::type_list<Args...>> {
     static T* Create(ServiceContainer& container)
     {
         return new T(Args{ container }...);
@@ -41,6 +42,9 @@ struct DefaultConstructor<T, drgn::type_list<Args...>> {
 };
 
 class ServiceContainer {
+    template<class T>
+    friend struct any_type;
+
 private:
     class ServiceBase {
     public:
@@ -120,7 +124,6 @@ protected:
     {
         auto id = TypeId::Get<T>();
         m_services.emplace(id, std::make_shared<Service<T>>(id, std::move(initializer), std::move(finalizer)));
-        m_serviceOrder.push_back(m_services[id]);
     }
 
 public:
@@ -141,9 +144,10 @@ public:
         using ctor = drgn::ctor_traits<T, CtorArgN>;
         static_assert(typename ctor::is_constructible, "ServiceContainer::Register<T>() has failed to be instanciated" 
             "\nerror: Does the constructor of T only use reference (Arg&) or pointer (Arg*) argument?"
+            "\nerror: Does the constructor of T depens on itself (T& or T*)?"
             "\nerror: Does the number of argument of T constructor < CtorArgN? If so you can change number by calling: Register<T, CtorArgN>()"
         );
-        using Factory = drgn::DefaultConstructor<T, ctor::args>;
+        using Factory = drgn::DefaultFactory<T, ctor::args>;
 
         auto constructor = [](ServiceContainer& container) -> T* { return Factory::Create(container); };
         auto destructor = [](T* instance) -> void { Factory::Destroy(instance); };
@@ -152,12 +156,8 @@ public:
 
     void Initialize()
     {
-        for (auto s : m_serviceOrder) {
-            auto service = s.lock();
-            if (!service->IsInitialized())
-            {
-                service->Initialize(*this);
-            }
+        for (const auto& s : m_services) {
+            TryInitializeService(s.second);
         }
     }
 
@@ -171,6 +171,29 @@ public:
         std::shared_ptr<ServiceBase> service = iter->second;
 
         return *reinterpret_cast<T*>(service->Get());
+    }
+
+protected:
+    template <class T>
+    T& GetOrCreate()
+    {
+        TypeId id = TypeId::Get<T>();
+        auto iter = m_services.find(id);
+        assert(iter != m_services.end());
+
+        std::shared_ptr<ServiceBase> service = iter->second;
+
+        TryInitializeService(service);
+
+        return *reinterpret_cast<T*>(service->Get());
+    }
+
+    void TryInitializeService(std::shared_ptr<ServiceBase> service)
+    {
+        if (!service->IsInitialized()) {
+            service->Initialize(*this);
+            m_serviceOrder.push_back(service);
+        }
     }
 
 private:
