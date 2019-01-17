@@ -13,7 +13,9 @@ void benchmark_test()
 {
     drgn::ServiceContainer container;
     init_container(container);
-    container.Initialize();
+    
+    drgn::Result r = container.Initialize();
+    assert(r.IsSuccess());
 
     MyClass_0_0& a = container.Get<MyClass_0_0>();
     MyClass_1_0& b = container.Get<MyClass_1_0>();
@@ -22,12 +24,12 @@ void benchmark_test()
 }
 #endif
 
-void FinalizeModuleA(ModuleA* ptr)
+void DestroyModuleA(ModuleA* ptr)
 {
     delete ptr;
 }
 
-void FinalizeModuleB(ModuleB* ptr)
+void DestroyModuleB(ModuleB* ptr)
 {
     delete ptr;
 }
@@ -45,10 +47,11 @@ ModuleB* CreateModuleB(ModuleA& moduleA)
 void simple_test()
 {
     drgn::ServiceContainer container;
-    container.Register<ModuleB>();
-    container.Register<ModuleA>();
+    container.Register<ModuleB>(CreateModuleB, DestroyModuleB);
+    container.Register<ModuleA>(CreateModuleA, DestroyModuleA);
 
-    container.Initialize();
+    drgn::Result r = container.Initialize();
+    assert(r.IsSuccess());
 
     ModuleB& b0 = container.Get<ModuleB>();
     ModuleA& a0 = container.Get<ModuleA>();

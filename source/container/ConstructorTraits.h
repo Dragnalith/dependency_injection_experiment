@@ -24,7 +24,7 @@ struct any_type {
         class = std::enable_if_t<!std::is_same_v<const TParent, T> && !std::is_same_v<TParent, T>>>
     operator T*() const
     {
-        return &container.Get<T>();
+        return &container.GetOrCreate<T>();
     }
 
     ServiceContainer& container;

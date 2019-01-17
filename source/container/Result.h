@@ -5,12 +5,12 @@ namespace drgn
 
 class Result
 {
-protected:
-    Result(bool success)
+public:
+    Result(bool success, const char* message)
         : m_isSuccess(success)
+        , m_message(message)
     {}
 
-public:
     bool IsSuccess()
     {
         return m_isSuccess;
@@ -18,7 +18,19 @@ public:
 
 private:
     bool m_isSuccess;
+    const char* m_message;
 };
+
+class ResultSuccess
+{
+public:
+    operator Result()
+    {
+        return Result(true, "Success");
+    }
+};
+
+#define DRGN_RETURN_IF_FAILURE(r) do { if (!r.IsSuccess()) { return r; } } while (false)
 
 
 }
