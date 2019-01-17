@@ -5,7 +5,7 @@
 class ModuleB
 {
 public:
-    ModuleB(ModuleA& moduleA, ModuleA* ptrModuleA)
+    ModuleB(ModuleA& moduleA, ModuleA* ptrModuleA, ModuleA& moduleA2)
         : m_moduleA(moduleA)
     {}
 

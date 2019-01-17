@@ -44,7 +44,7 @@ public:
 {dep1}
     {{}}
 
-private:
+public:
     int foo;
 {dep2}
 }};""".format(class_name=class_name(node), dep1=dep1, dep2=dep2, dep3=dep3)
@@ -54,7 +54,7 @@ class {class_name} {{
 public:
     {class_name} () {{}}
 
-private:
+public:
     int foo = 0;
 }};""".format(class_name=class_name(node))
 
@@ -109,10 +109,12 @@ def main():
     output_path_kangaru = dest_folder + "gen_test.kangaru.h"
     output_path_kangaru2 = dest_folder + "gen_test.kangaru.2.h"
     output_path_manual = dest_folder + "gen_test.manual.h"
+    output_path_container = dest_folder + "gen_test.container.h"
 
     with open(output_path, 'w+') as output_file:
         output_file.write("#pragma once\n")
 
+        output_file.write("\n// {} classes has been generated.\n".format(count))
         def write_class(node):
             output_file.write(class_code(node, setting))
             output_file.write("\n")
@@ -145,6 +147,21 @@ def main():
         output_file.write("}\n")
 
     
+    with open(output_path_container, 'w+') as output_file:
+        output_file.write("#pragma once\n")
+
+        output_file.write("#include \"gen_test.h\"\n")
+        output_file.write("#include <source/container/ServiceContainer.h>\n")
+
+        output_file.write("\nvoid init_container(drgn::ServiceContainer& container) {\n")
+
+        def write_container_register(node):
+            output_file.write("    container.Register<{class_name}>();\n".format(class_name=class_name(node)))
+        iterate_node(setting, write_container_register)
+
+        output_file.write("\n}\n")
+
+
     with open(output_path_kangaru, 'w+') as output_file:
         output_file.write("#pragma once\n")
 

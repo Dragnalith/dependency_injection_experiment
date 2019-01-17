@@ -88,6 +88,10 @@ private:
 
         void Initialize(ServiceContainer& container) override
         {
+            assert(m_status != Status::IsInitialized);
+            assert(m_status != Status::StartInitializing);
+            m_status = Status::StartInitializing;
+
             m_instance = m_initializer(container);
             m_status = Status::IsInitialized;
         }
@@ -131,18 +135,29 @@ public:
         RegisterImpl<T>(initializer, finalizer);
     }
 
-    template <class T>
+    template <class T, int CtorArgN = 10>
     void Register()
     {
-        using Factory = drgn::DefaultConstructor<ModuleB, drgn::ctor_args<ModuleB>>;
-        RegisterImpl<T>(Factory::Create, Factory::Destroy);
+        using ctor = drgn::ctor_traits<T, CtorArgN>;
+        static_assert(typename ctor::is_constructible, "ServiceContainer::Register<T>() has failed to be instanciated" 
+            "\nerror: Does the constructor of T only use reference (Arg&) or pointer (Arg*) argument?"
+            "\nerror: Does the number of argument of T constructor < CtorArgN? If so you can change number by calling: Register<T, CtorArgN>()"
+        );
+        using Factory = drgn::DefaultConstructor<T, ctor::args>;
+
+        auto constructor = [](ServiceContainer& container) -> T* { return Factory::Create(container); };
+        auto destructor = [](T* instance) -> void { Factory::Destroy(instance); };
+        RegisterImpl<T>(constructor, destructor);
     }
 
     void Initialize()
     {
         for (auto s : m_serviceOrder) {
             auto service = s.lock();
-            service->Initialize(*this);
+            if (!service->IsInitialized())
+            {
+                service->Initialize(*this);
+            }
         }
     }
 
