@@ -1,7 +1,11 @@
 #pragma once
 
-class ModuleA
-{
+#include "Result.h"
+
+class ModuleA {
 public:
+    drgn::Result Initialize() {
+        return drgn::ResultSuccess();
+    }
     int m_value = 42;
 };

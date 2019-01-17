@@ -23,7 +23,6 @@ struct Factory<T, Creater, Destroyer, type_list<Args...>> {
     static Result Create(Creater f, ServiceContainer& container, T** instance)
     {
         Result tests[] = { ResultSuccess(), container.Initialize<base_type<Args>>()... };
-        bool test = true;
         for (int i = 0; i < sizeof...(Args) + 1; i++)
         {
             DRGN_RETURN_IF_FAILURE(tests[i]);
@@ -52,6 +51,59 @@ struct ConstructorFactory<T, drgn::type_list<Args...>> {
     static Result Destroy(T* instance)
     {
         delete instance;
+        return ResultSuccess();
+    }
+};
+
+template <class T, class>
+struct InitializerImpl;
+
+template <class T, class... Args>
+struct InitializerImpl<T, drgn::type_list<Args...>> {
+    static Result Initialize(ServiceContainer& container, T* instance)
+    {
+        return instance->Initialize(Args{ container }...);
+    }
+};
+
+template <class T, class = int>
+struct Initializer;
+
+template <class T>
+struct Initializer<T, std::enable_if_t<has_initialize<T>>> {
+    using traits = function_traits<decltype(&T::Initialize)>;
+    static Result Initialize(ServiceContainer& container, T* instance)
+    {
+        static_assert(std::is_same<typename traits::result_type, Result>::value, "T::Initialize method should return a result");
+        return InitializerImpl<T, typename traits::args>::Initialize(container, instance);
+    }
+};
+
+template <class T>
+struct Initializer<T, std::enable_if_t<!has_initialize<T>>> {
+    static Result Initialize(ServiceContainer& container, T* instance)
+    {
+        return ResultSuccess();
+    }
+};
+
+template <class T, class = int>
+struct Finalizer;
+
+template <class T>
+struct Finalizer<T, std::enable_if_t<has_finalize<T>>> {
+    using traits = typename function_traits<decltype(T::Initialize)>;
+    static Result Finalize(T* instance)
+    {
+        static_assert(std::is_same(traits::return_type, Result), "T::Finalize method should return a result");
+        return instance->Finalize();
+    }
+};
+
+template <class T>
+struct Finalizer<T, std::enable_if_t<!has_finalize<T>>> {
+    static Result Finalize(T* instance)
+    {
         return ResultSuccess();
     }
 };
@@ -158,10 +210,14 @@ public:
         static_assert(std::is_same_v<T*, drgn::function_traits<CreateFunc>::result_type>, "Type registered and type returned by the creater are different");
         using Factory = Factory<T, CreateFunc, DestroyFunc, typename function_traits<CreateFunc>::args>;
         auto initializer = [this, creater](ServiceContainer& container, T** instance) -> Result {
-            return Factory::Create(creater, *this, instance);
+            Result r = Factory::Create(creater, *this, instance);
+            DRGN_RETURN_IF_FAILURE(r);
+            return Initializer<T, void>::Initialize(container, *instance);
         };
         auto finalizer = [this, destroyer](T* instance) -> Result {
-            return Factory::Destroy(destroyer, instance);
+            Result r = Factory::Destroy(destroyer, instance);
+            DRGN_RETURN_IF_FAILURE(r);
+            return Finalizer<T, void>::Finalize(instance);
         };
         RegisterImpl<T>(initializer, finalizer);
     }
@@ -178,14 +234,14 @@ public:
         using Factory = drgn::ConstructorFactory<T, ctor::args>;
 
         auto constructor = [](ServiceContainer& container, T** instance) -> Result { 
-            Result r =Factory::Create(container, instance); 
+            Result r = Factory::Create(container, instance); 
             DRGN_RETURN_IF_FAILURE(r);
-            return ResultSuccess();
+            return Initializer<T, void>::Initialize(container, *instance);
         };
         auto destructor = [] (T* instance) -> Result { 
             Result r = Factory::Destroy(instance); 
             DRGN_RETURN_IF_FAILURE(r);
-            return ResultSuccess();
+            return Finalizer<T, void>::Finalize(instance);
         };
         RegisterImpl<T>(constructor, destructor);
     }

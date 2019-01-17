@@ -45,4 +45,31 @@ void print_type() {
     T::this_method_Sh0uldNotExist_();
 }
 
+template <class T>
+class has_initialize_t {
+    template <typename C>
+    static std::true_type test(decltype(&C::Initialize));
+    template <typename C>
+    static std::false_type test(...);
+
+public:
+    static constexpr bool value = decltype(test<T>(nullptr))::value;
+};
+
+template <class T>
+constexpr bool has_initialize = has_initialize_t<T>::value;
+
+template <class T>
+class has_finalize_t {
+    template <typename C>
+    static std::true_type test(decltype(&C::Finalize));
+    template <typename C>
+    static std::false_type test(...);
+public:
+    static constexpr bool value = decltype(test<T>(nullptr))::value;
+};
+
+template <class T>
+constexpr bool has_finalize = has_finalize_t<T>::value;
+
 }
