@@ -10,6 +10,8 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
+#include <stack>
+#include <ostream>
 
 namespace drgn {
 
@@ -142,6 +144,21 @@ private:
             return m_status;
         }
 
+        const char* GetName() const
+        {
+            return m_id.GetName();
+        }
+
+        const std::vector<std::weak_ptr<ServiceBase>>& GetDependencies() const
+        {
+            return m_dependencies;
+        }
+
+        void AddDependency(std::weak_ptr<ServiceBase> service)
+        {
+            m_dependencies.push_back(service);
+        }
+
         virtual Result Initialize(ServiceContainer& container) = 0;
         virtual Result Finalize(ServiceContainer& container) = 0;
 
@@ -150,6 +167,7 @@ private:
     protected:
         TypeId m_id;
         Status m_status;
+        std::vector<std::weak_ptr<ServiceBase>> m_dependencies;
     };
 
 
@@ -294,9 +312,23 @@ public:
     {
         for (const auto& s : m_services) {
             Result r = TryInitializeService(s.second);
+            assert(m_dependencyStack.size() == 0);
             DRGN_RETURN_IF_FAILURE(r);
         }
         return ResultSuccess();
+    }
+    
+    void RenderGraph(std::ostream& stream) const
+    {
+        stream << "digraph dependency_graph{\n";
+        for (const auto& s : m_services) {
+            auto& service = s.second;
+            for (const auto& dep : service->GetDependencies())
+            {
+                stream << "    \"" << service->GetName() << "\" -> \"" << dep.lock()->GetName() << "\";\n";
+            }
+        }
+        stream << "}\n";
     }
 
     template <class T>
@@ -380,8 +412,17 @@ protected:
 
     Result TryInitializeService(std::shared_ptr<ServiceBase> service)
     {
+        if (m_dependencyStack.size() > 0)
+        {
+            auto parentService = m_dependencyStack.top().lock();
+            parentService->AddDependency(service);
+        }
         if (!service->IsInitialized()) {
+
+            m_dependencyStack.push(service);
             Result r = service->Initialize(*this);
+            m_dependencyStack.pop();
+            
             DRGN_RETURN_IF_FAILURE(r);
 
             m_serviceOrder.push_back(service);
@@ -402,5 +443,6 @@ protected:
 private:
     std::unordered_map<TypeId, std::shared_ptr<ServiceBase>> m_services;
     std::vector<std::weak_ptr<ServiceBase>> m_serviceOrder;
+    std::stack<std::weak_ptr<ServiceBase>> m_dependencyStack;
 };
 }

@@ -3,6 +3,37 @@
 #include <source/container/ServiceContainer.h>
 
 void init_container(drgn::ServiceContainer& container) {
+    container.Register<MyClass_4_0>();
+    container.Register<MyClass_4_1>();
+    container.Register<MyClass_4_2>();
+    container.Register<MyClass_4_3>();
+    container.Register<MyClass_4_4>();
+    container.Register<MyClass_4_5>();
+    container.Register<MyClass_4_6>();
+    container.Register<MyClass_4_7>();
+    container.Register<MyClass_4_8>();
+    container.Register<MyClass_4_9>();
+    container.Register<MyClass_4_10>();
+    container.Register<MyClass_4_11>();
+    container.Register<MyClass_4_12>();
+    container.Register<MyClass_4_13>();
+    container.Register<MyClass_4_14>();
+    container.Register<MyClass_4_15>();
+    container.Register<MyClass_4_16>();
+    container.Register<MyClass_4_17>();
+    container.Register<MyClass_4_18>();
+    container.Register<MyClass_4_19>();
+    container.Register<MyClass_4_20>();
+    container.Register<MyClass_4_21>();
+    container.Register<MyClass_4_22>();
+    container.Register<MyClass_4_23>();
+    container.Register<MyClass_4_24>();
+    container.Register<MyClass_4_25>();
+    container.Register<MyClass_4_26>();
+    container.Register<MyClass_4_27>();
+    container.Register<MyClass_4_28>();
+    container.Register<MyClass_4_29>();
+    container.Register<MyClass_4_30>();
     container.Register<MyClass_3_0>();
     container.Register<MyClass_3_1>();
     container.Register<MyClass_3_2>();
@@ -18,18 +49,6 @@ void init_container(drgn::ServiceContainer& container) {
     container.Register<MyClass_3_12>();
     container.Register<MyClass_3_13>();
     container.Register<MyClass_3_14>();
-    container.Register<MyClass_3_15>();
-    container.Register<MyClass_3_16>();
-    container.Register<MyClass_3_17>();
-    container.Register<MyClass_3_18>();
-    container.Register<MyClass_3_19>();
-    container.Register<MyClass_3_20>();
-    container.Register<MyClass_3_21>();
-    container.Register<MyClass_3_22>();
-    container.Register<MyClass_3_23>();
-    container.Register<MyClass_3_24>();
-    container.Register<MyClass_3_25>();
-    container.Register<MyClass_3_26>();
     container.Register<MyClass_2_0>();
     container.Register<MyClass_2_1>();
     container.Register<MyClass_2_2>();
@@ -37,8 +56,6 @@ void init_container(drgn::ServiceContainer& container) {
     container.Register<MyClass_2_4>();
     container.Register<MyClass_2_5>();
     container.Register<MyClass_2_6>();
-    container.Register<MyClass_2_7>();
-    container.Register<MyClass_2_8>();
     container.Register<MyClass_1_0>();
     container.Register<MyClass_1_1>();
     container.Register<MyClass_1_2>();
