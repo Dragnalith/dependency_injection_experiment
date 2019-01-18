@@ -2,10 +2,22 @@
 
 #include "Result.h"
 
+struct Setting {
+    int Value;
+    bool IsEnabled;
+};
+
 class ModuleA {
 public:
-    drgn::Result Initialize() {
+    ModuleA(const Setting& setting)
+        : m_setting(setting)
+    {
+    }
+
+    drgn::Result Initialize()
+    {
         return drgn::ResultSuccess();
     }
     int m_value = 42;
+    const Setting& m_setting;
 };

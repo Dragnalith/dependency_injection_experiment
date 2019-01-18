@@ -34,9 +34,9 @@ void DestroyModuleB(ModuleB* ptr)
     delete ptr;
 }
 
-ModuleA* CreateModuleA()
+ModuleA* CreateModuleA(const Setting& setting)
 {
-    return new ModuleA();
+    return new ModuleA(setting);
 }
 
 ModuleB* CreateModuleB(ModuleA& moduleA)
@@ -46,7 +46,12 @@ ModuleB* CreateModuleB(ModuleA& moduleA)
 
 void simple_test()
 {
+    Setting setting;
+    setting.IsEnabled = true;
+    setting.Value = 666;
+
     drgn::ServiceContainer container;
+    container.RegisterExternal<Setting>(&setting);
     container.Register<ModuleB>(CreateModuleB, DestroyModuleB);
     container.Register<ModuleA>(CreateModuleA, DestroyModuleA);
 
@@ -61,6 +66,7 @@ void simple_test()
     assert(&a0 == &a1);
     assert(&b0 == &b1);
     assert(&a0 == &b0.m_moduleA);
+    assert(&a0.m_setting == &setting);
 }
 
 int main()

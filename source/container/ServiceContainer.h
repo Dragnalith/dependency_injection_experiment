@@ -152,14 +152,15 @@ private:
         Status m_status;
     };
 
+
     template <class T>
     class Service : public ServiceBase {
     public:
         using InitializerFunc = std::function<Result(ServiceContainer&, T**)>;
         using FinalizerFunc = std::function<Result(T*)>;
-
-        Service(TypeId id, InitializerFunc&& initializer, FinalizerFunc&& finalizer)
-            : ServiceBase(id)
+        
+        Service(InitializerFunc&& initializer, FinalizerFunc&& finalizer)
+            : ServiceBase(TypeId::Get<T>())
             , m_initializer(std::move(initializer))
             , m_finalizer(std::move(finalizer))
         {
@@ -173,7 +174,7 @@ private:
                 return Result(false, "Circular dependency detected");
             }
             m_status = Status::StartInitializing;
-
+        
             Result r = m_initializer(container, &m_instance);
             if (!r.IsSuccess())
             {
@@ -184,6 +185,39 @@ private:
                 return ResultSuccess();            
             }
         }
+        
+        void* Get() const
+        {
+            return m_instance;
+        }
+        
+        Result Finalize(ServiceContainer& container) override
+        {
+            m_instance = nullptr;
+            m_status = Status::NotInitialized;
+            return m_finalizer(m_instance);
+        }
+
+        T* m_instance;
+        InitializerFunc m_initializer;
+        FinalizerFunc m_finalizer;
+    };
+
+    template <class T>
+    class ExternalService : public ServiceBase 
+    {
+    public:
+
+        ExternalService(T* instance)
+            : ServiceBase(TypeId::Get<T>())
+            , m_instance(instance)
+        {
+        }
+
+        Result Initialize(ServiceContainer& container) override
+        {
+            return ResultSuccess();
+        }
 
         void* Get() const
         {
@@ -192,22 +226,22 @@ private:
 
         Result Finalize(ServiceContainer& container) override
         {
-            m_instance = nullptr;
-            m_status = Status::NotInitialized;
-            return m_finalizer(m_instance);
+            return ResultSuccess();
         }
 
     private:
         T* m_instance = nullptr;
-        InitializerFunc m_initializer;
-        FinalizerFunc m_finalizer;
     };
+
+
 
 public:
     template <class T, class CreateFunc, class DestroyFunc>
     void Register(CreateFunc creater, typename DestroyFunc destroyer)
     {
+        static_assert(std::is_same_v<base_type<T>, T>, "Only base type can be registered. T has a reference, a pointer, or const are forbidden");
         static_assert(std::is_same_v<T*, drgn::function_traits<CreateFunc>::result_type>, "Type registered and type returned by the creater are different");
+        
         using Factory = Factory<T, CreateFunc, DestroyFunc, typename function_traits<CreateFunc>::args>;
         auto initializer = [this, creater](ServiceContainer& container, T** instance) -> Result {
             Result r = Factory::Create(creater, *this, instance);
@@ -225,6 +259,7 @@ public:
     template <class T, int CtorArgN = 10>
     void Register()
     {
+        static_assert(std::is_same_v<base_type<T>, T>, "Only base type can be registered. T has a reference, a pointer, or const are forbidden");
         using ctor = drgn::ctor_traits<T, CtorArgN>;
         static_assert(typename ctor::is_constructible, "ServiceContainer::Register<T>() has failed to be instanciated" 
             "\nerror: Does the constructor of T only use reference (Arg&) or pointer (Arg*) argument?"
@@ -244,6 +279,15 @@ public:
             return Finalizer<T, void>::Finalize(instance);
         };
         RegisterImpl<T>(constructor, destructor);
+    }
+
+    template <class T>
+    void RegisterExternal(T* instance)
+    {
+        static_assert(std::is_same_v<base_type<T>, T>, "Only base type can be registered. T has a reference, a pointer, or const are forbidden");
+        auto id = TypeId::Get<T>();
+        assert(m_services.find(id) == m_services.end());
+        m_services.emplace(id, std::make_shared<ExternalService<T>>(instance));
     }
 
     Result Initialize()
@@ -351,7 +395,8 @@ protected:
     void RegisterImpl(typename Service<T>::InitializerFunc initializer, typename Service<T>::FinalizerFunc finalizer)
     {
         auto id = TypeId::Get<T>();
-        m_services.emplace(id, std::make_shared<Service<T>>(id, std::move(initializer), std::move(finalizer)));
+        assert(m_services.find(id) == m_services.end());
+        m_services.emplace(id, std::make_shared<Service<T>>(std::move(initializer), std::move(finalizer)));
     }
 
 private:
