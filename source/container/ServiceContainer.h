@@ -30,7 +30,7 @@ struct Factory<T, Creater, Destroyer, type_list<Args...>> {
             DRGN_RETURN_IF_FAILURE(tests[i]);
         }
 
-        *instance = f(container.GetOrCreate<base_type<Args>>()...);
+        *instance = f(container.Get<base_type<Args>>()...);
         return ResultSuccess();
     }
     static Result Destroy(Destroyer f, T* instance)
@@ -230,6 +230,7 @@ private:
             : ServiceBase(TypeId::Get<T>())
             , m_instance(instance)
         {
+            m_status = Status::IsInitialized;
         }
 
         Result Initialize(ServiceContainer& container) override
